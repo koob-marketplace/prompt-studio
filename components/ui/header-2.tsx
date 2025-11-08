@@ -21,6 +21,10 @@ export function FloatingHeader() {
 
 	const links = [
 		{
+			label: 'Home',
+			href: '/',
+		},
+		{
 			label: 'Studio',
 			href: '/studio',
 		},
@@ -39,19 +43,22 @@ export function FloatingHeader() {
 			)}
 		>
 			<nav className="mx-auto flex items-center justify-between p-1.5">
-				<div className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 duration-100">
+				<Link 
+					href="/" 
+					className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 duration-100"
+				>
 					<Grid2x2PlusIcon className="size-5" />
 					<p className="font-mono text-base font-bold">Prompt Studio</p>
-				</div>
+				</Link>
 				<div className="hidden items-center gap-1 lg:flex">
 					{links.map((link) => (
-						<a
+						<Link
 							key={link.label}
 							className={buttonVariants({ variant: 'ghost', size: 'sm' })}
 							href={link.href}
 						>
 							{link.label}
-						</a>
+						</Link>
 					))}
 				</div>
 				<div className="flex items-center gap-2">
