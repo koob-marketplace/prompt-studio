@@ -10,8 +10,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronDown } from 'lucide-react';
 import { getFrameworks, loadFramework } from '../actions/framework-actions';
-import { jsonToPromptNodes } from '../utils/transform';
-import { PromptNode } from '../types';
+import { jsonToPromptNodes } from '@/lib/utils/transform';
+import { PromptNode } from '@/lib/types/PromptNode';
 
 type FrameworkSelectorProps = {
   onSelect: (nodes: PromptNode[]) => void;

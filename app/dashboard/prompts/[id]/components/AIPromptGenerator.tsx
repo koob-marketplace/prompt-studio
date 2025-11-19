@@ -136,7 +136,7 @@ export const AIPromptGenerator = ({ onGenerate }: AIPromptGeneratorProps) => {
               onChange={(e) => setUserRequest(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isLoading}
-              className="bg-white dark:bg-slate-900"
+              className="bg-background"
             />
             <Button
               onClick={handleGenerate}
@@ -150,10 +150,6 @@ export const AIPromptGenerator = ({ onGenerate }: AIPromptGeneratorProps) => {
               )}
             </Button>
           </div>
-
-          <p className="text-xs text-muted-foreground">
-            Powered by Mistral AI • Returns valid JSON only
-          </p>
 
           {generatedJSON && (
             <div className="space-y-3 border rounded-lg p-4 bg-muted/50">

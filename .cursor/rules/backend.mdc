@@ -1,0 +1,60 @@
+---
+alwaysApply: true
+---
+# Backend Architecture & Development Guidelines
+
+This document outlines the architecture, patterns, and best practices for developing the backend of our application. Adhering to these guidelines is crucial for maintaining a secure, scalable, and maintainable system.
+
+## 1. Core Architecture: A Layered Approach
+
+Our backend is built on a layered architecture that promotes a strong separation of concerns. Each layer has a distinct responsibility:
+
+*   **`actions`**: The entry point for all server-side operations initiated by the frontend. These are Next.js Server Actions. Their role is to orchestrate calls to the `services` layer and handle the final response to the client.
+*   **`services`**: This layer contains the core business logic of our application. It is responsible for orchestrating calls to the `repositories` to perform data operations.
+*   **`repositories`**: The data access layer. Repositories are responsible for all interactions with the database, using Drizzle ORM. They abstract away the specifics of the database, providing a clean API to the `services` layer.
+*   **`validators`**: Defines Zod schemas for validating all incoming data. This is our first line of defense against invalid or malicious data.
+*   **`guards`**: Contains functions that perform authorization and authentication checks. Guards are used in the `actions` and `services` layers to protect sensitive operations.
+*   **`types`**: Holds all TypeScript type definitions and interfaces for our backend entities and data structures.
+*   **`utils`**: A collection of utility functions, such as error handling and response formatting.
+
+## 2. The Flow of a Request
+
+A typical request flows through our backend in the following order:
+
+1.  **`actions`**: A Server Action is called from the frontend. It receives the request data.
+2.  **`guards`**: The action first calls a guard function to ensure the user is authenticated and has the necessary permissions.
+3.  **`validators`**: The action then validates the incoming data using the appropriate Zod schema from the `validators` directory.
+4.  **`services`**: If validation and authorization pass, the action calls the relevant `service` method, passing the validated data.
+5.  **`repositories`**: The `service` method interacts with one or more `repositories` to perform the necessary database operations.
+6.  **Response**: The result is returned up the chain, and the `action` formats the final response to the client, using helper functions from `response.utils.ts`.
+
+## 3. Error Handling
+
+We use a centralized approach to error handling:
+
+*   All errors should be caught and handled within the `actions` layer.
+*   The `error.utils.ts` file provides helper functions for creating standardized error objects.
+*   The `response.utils.ts` file provides helper functions for formatting success and error responses.
+
+## 4. Database & Schema
+
+*   Our database schema is defined using Drizzle ORM in the `/db` directory.
+*   Each table has its own schema file (e.g., `db/users.ts`).
+*   All interactions with the database **must** go through the `repositories` layer. Do not use Drizzle directly in the `services` or `actions` layers.
+
+## 5. Security Best Practices
+
+*   **Always Validate Input**: Every Server Action that receives data must validate it with a Zod schema before processing.
+*   **Always Authorize**: Every Server Action that performs a sensitive operation must use a guard to check user permissions.
+*   **Secure API Keys**: All external API keys must be encrypted before being stored in the database. Use the functions provided in `lib/security/encryption.ts` for this.
+*   **Never Expose Sensitive Data**: Be mindful of the data you return to the client. The `actions` layer is the final gatekeeper of what information is sent to the frontend.
+
+## 6. Code Style & Conventions
+
+*   **Modularity**: Keep files small and focused on a single responsibility.
+*   **Descriptive Naming**: Use clear and descriptive names for variables, functions, and classes.
+*   **TypeScript**: Use TypeScript to its full potential. Define types for all data structures.
+*   **Immutability**: Favor immutable data structures where possible.
+*   **Dependency Injection**: While not formally implemented with a framework, the layered architecture naturally lends itself to a form of manual dependency injection (e.g., passing a repository instance to a service).
+
+By following these guidelines, we can ensure that our backend remains robust, secure, and easy to work with as our application evolves.

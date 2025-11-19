@@ -1,4 +1,5 @@
-import { pgTable, serial, text, timestamp, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, serial, text, timestamp, jsonb, uniqueIndex } from 'drizzle-orm/pg-core'
+
 
 export const templates = pgTable('templates', {
   id: serial('id').primaryKey(),
@@ -9,5 +10,7 @@ export const templates = pgTable('templates', {
   slug: text('slug').unique(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+}, (table) => ({
+  slugUnique: uniqueIndex('slug_unique').on(table.slug),
+}));
 

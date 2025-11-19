@@ -1,0 +1,102 @@
+---
+alwaysApply: true
+---
+# Frontend Architecture & Development Guidelines
+
+This document outlines the architecture, patterns, and best practices for developing the frontend of our Next.js application. Our primary goal is to create a fast, maintainable, and scalable user interface by embracing a server-first approach.
+
+## 1. Core Philosophy: Server-First
+
+We prioritize rendering on the server and sending minimal JavaScript to the client. This results in better performance and a simpler developer experience.
+
+-   **Shift Left**: Move data fetching and rendering logic as close to the server as possible.
+-   **Minimize `useEffect`**: Actively avoid `useEffect` for data fetching. Its role is limited to synchronizing with client-side, external systems (e.g., browser APIs).
+-   **Progressive Interactivity**: Start with static HTML from the server and layer on client-side interactivity only where necessary.
+
+---
+
+## 2. Component Architecture: Server vs. Client
+
+In the Next.js App Router, components are Server Components by default. This is the foundation of our architecture.
+
+### Server Components (`.tsx` by default)
+
+-   **Purpose**: Data fetching, accessing backend resources (databases, APIs), and rendering non-interactive UI.
+-   **Capabilities**: Can be `async`, can directly access the file system and database.
+-   **Location**: These are the default. Your `page.tsx` and `layout.tsx` files should almost always be Server Components.
+-   **Rule**: **Use a Server Component for everything unless you explicitly need client-side interactivity.**
+
+// app/dashboard/page.tsx - A typical Server Component
+import { db } from '@/db';
+import { DashboardClient } from './components/dashboard-client';
+
+export default async function DashboardPage() {
+  // 1. Data is fetched directly on the server
+  const userPrompts = await db.query.prompts.findMany();
+
+  // 2. Data is passed as props to a Client Component if interactivity is needed
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <DashboardClient initialPrompts={userPrompts} />
+    </div>
+  );
+}### Client Components (`'use client'`)
+
+-   **Purpose**: Handling user interactivity and browser-only APIs.
+-   **Capabilities**: Can use hooks (`useState`, `useEffect`, `useContext`), event listeners (`onClick`, `onChange`).
+-   **Rule**: Create Client Components only when you need interactivity. Keep them as small and as far down the component tree ("in the leaves") as possible. Mark them with `'use client'` at the very top of the file.
+
+// app/dashboard/components/dashboard-client.tsx - A Client Component
+'use client';
+
+import { useState } from 'react';
+
+export function DashboardClient({ initialPrompts }) {
+  const [prompts, setPrompts] = useState(initialPrompts);
+  // ... logic to add, edit, or delete prompts
+  return (
+    <div>
+      {/* Interactive UI elements go here */}
+    </div>
+  );
+}---
+
+## 3. State Management Hierarchy
+
+We use a layered approach to state management, choosing the simplest and most effective tool for the job.
+
+### Level 1: URL State (for Server State)
+
+The URL is our primary state manager for data that comes from the server. This makes the UI shareable, bookmarkable, and resilient.
+
+-   **Use Case**: Filters, search queries, sorting, pagination.
+-   **Implementation**: Use the `useSearchParams`, `useRouter`, and `usePathname` hooks from `next/navigation` in a Client Component to update the URL. A parent Server Component reads `searchParams` and fetches the appropriate data.
+-   **Benefit**: This completely eliminates the need for `useEffect` and client-side state for fetching and re-fetching filtered data.
+
+### Level 2: Client UI State
+
+This is for state that is not persisted in the backend and relates purely to the UI.
+
+-   **Local State (`useState`, `useReducer`)**: Use for state that is confined to a single component (e.g., form input values, toggle states like `isModalOpen`). This should be your default choice for UI state.
+
+-   **Global State (Zustand)**: Use for state that needs to be shared across multiple, disconnected components.
+    -   **Use Case**: The current user's session, theme (`light`/`dark`), the state of a global sidebar.
+    -   **Implementation**: Define stores in the `/lib/store` directory.
+    -   **Rule**: Use global state sparingly. Always ask if the state can be managed by the URL or lifted to a shared parent component first.
+
+### Level 3: Data Mutations (Server Actions)
+
+For creating, updating, or deleting data, we use Server Actions.
+
+-   **Implementation**: Define an `async` function with the `'use server'` directive. This function can be called directly from a Client Component (e.g., in a form's `action` or an `onClick` handler).
+-   **Benefit**: Server Actions handle the communication with the backend and can revalidate data, which automatically updates the UI without any manual client-side state management.
+
+---
+
+## 4. Directory Structure & Types
+
+-   **Feature Colocation**: Keep all files related to a single feature (pages, components, actions, hooks) within the same directory under `app/(features)/feature-name`.
+-   **Shared Types**: To ensure end-to-end type safety, all types shared between the backend and frontend are defined in the `/lib/types` directory. This is the single source of truth for our data structures.
+-   **UI Primitives**: Reusable, unstyled UI components from Shadcn live in `/components/ui`.
+-   **Shared Components**: Reusable components that are composed of UI primitives and have application-specific logic live in `/components/shared`.

@@ -1,0 +1,1 @@
+ALTER TABLE "prompts" RENAME COLUMN "configuration" TO "json";

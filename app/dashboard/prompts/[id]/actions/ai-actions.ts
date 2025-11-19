@@ -103,7 +103,7 @@ Remember: RESPOND WITH ONLY JSON.`;
         model: 'open-mistral-7b',
         messages,
         temperature: 0.3,
-        max_tokens: 1024,
+        max_tokens: 4096,
         top_p: 0.8,
       }),
     });

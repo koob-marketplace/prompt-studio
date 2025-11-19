@@ -2,7 +2,13 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { PromptNode, NodeType } from '../types';
-import { promptNodesToJson } from '../utils/transform';
+import { 
+  promptNodesToJson, 
+  promptNodesToXml, 
+  promptNodesToMarkdown,
+  promptNodesToYaml,
+  promptNodesToToon
+} from '@/lib/utils/transform';
 
 const createNewNode = (
   type: NodeType,
@@ -124,108 +130,19 @@ export const usePrompt = (initialNodes: PromptNode[] = []) => {
   }, [nodes]);
 
   const promptAsXml = useMemo(() => {
-    // Grouper les nœuds par structure hiérarchique
-    const xmlStructure: Record<string, unknown> = {};
-    
-    nodes.forEach(node => {
-      if (node.key.includes('.')) {
-        // Gérer les clés imbriquées comme "examples.positive"
-        const parts = node.key.split('.');
-        let current = xmlStructure;
-        
-        for (let i = 0; i < parts.length - 1; i++) {
-          if (!current[parts[i]]) {
-            current[parts[i]] = {};
-          }
-          current = current[parts[i]] as Record<string, unknown>;
-        }
-        
-        const lastKey = parts[parts.length - 1];
-        if (node.type === 'string') {
-          current[lastKey] = node.value;
-        } else if (node.type === 'stringArray') {
-          current[lastKey] = node.values;
-        }
-      } else {
-        // Clés simples
-        if (node.type === 'string') {
-          xmlStructure[node.key] = node.value;
-        } else if (node.type === 'stringArray') {
-          xmlStructure[node.key] = node.values;
-        }
-      }
-    });
-
-    // Convertir la structure en XML
-    const convertToXml = (obj: Record<string, unknown>, indent = '  '): string => {
-      return Object.entries(obj).map(([key, value]) => {
-        if (Array.isArray(value)) {
-          const items = value.map(item => `${indent}  <item>${item}</item>`).join('\n');
-          return `${indent}<${key}>\n${items}\n${indent}</${key}>`;
-        } else if (typeof value === 'object' && value !== null) {
-          const nestedXml = convertToXml(value as Record<string, unknown>, indent + '  ');
-          return `${indent}<${key}>\n${nestedXml}\n${indent}</${key}>`;
-        } else {
-          return `${indent}<${key}>${value}</${key}>`;
-        }
-      }).join('\n');
-    };
-
-    return `<root>\n${convertToXml(xmlStructure)}\n</root>`;
+    return promptNodesToXml(nodes);
   }, [nodes]);
 
   const promptAsMarkdown = useMemo(() => {
-    // Grouper les nœuds par structure hiérarchique pour le markdown
-    const mdStructure: Record<string, unknown> = {};
-    
-    nodes.forEach(node => {
-      if (node.key.includes('.')) {
-        // Gérer les clés imbriquées comme "examples.positive"
-        const parts = node.key.split('.');
-        let current = mdStructure;
-        
-        for (let i = 0; i < parts.length - 1; i++) {
-          if (!current[parts[i]]) {
-            current[parts[i]] = {};
-          }
-          current = current[parts[i]] as Record<string, unknown>;
-        }
-        
-        const lastKey = parts[parts.length - 1];
-        if (node.type === 'string') {
-          current[lastKey] = node.value;
-        } else if (node.type === 'stringArray') {
-          current[lastKey] = node.values;
-        }
-      } else {
-        // Clés simples
-        if (node.type === 'string') {
-          mdStructure[node.key] = node.value;
-        } else if (node.type === 'stringArray') {
-          mdStructure[node.key] = node.values;
-        }
-      }
-    });
+    return promptNodesToMarkdown(nodes);
+  }, [nodes]);
 
-    // Convertir la structure en Markdown
-    const convertToMarkdown = (obj: Record<string, unknown>, level = 1): string => {
-      return Object.entries(obj).map(([key, value]) => {
-        const heading = '#'.repeat(Math.min(level, 6));
-        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-        
-        if (Array.isArray(value)) {
-          const items = value.map(item => `- ${item}`).join('\n');
-          return `${heading} ${capitalizedKey}\n\n${items}`;
-        } else if (typeof value === 'object' && value !== null) {
-          const nestedMd = convertToMarkdown(value as Record<string, unknown>, level + 1);
-          return `${heading} ${capitalizedKey}\n\n${nestedMd}`;
-        } else {
-          return `${heading} ${capitalizedKey}\n\n${value}`;
-        }
-      }).join('\n\n');
-    };
+  const promptAsYaml = useMemo(() => {
+    return promptNodesToYaml(nodes);
+  }, [nodes]);
 
-    return convertToMarkdown(mdStructure);
+  const promptAsToon = useMemo(() => {
+    return promptNodesToToon(nodes);
   }, [nodes]);
 
   return {
@@ -241,5 +158,7 @@ export const usePrompt = (initialNodes: PromptNode[] = []) => {
     promptAsJson,
     promptAsXml,
     promptAsMarkdown,
+    promptAsYaml,
+    promptAsToon,
   };
 };
