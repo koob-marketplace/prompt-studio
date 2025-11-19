@@ -80,10 +80,10 @@ const Navbar1 = ({
           <div className="flex gap-2 items-center">
             <ThemeToggle />
             <Button asChild variant="outline" size="sm">
-              <a href={auth.login.url}>{auth.login.text}</a>
+              <Link href={auth.login.url}>{auth.login.text}</Link>
             </Button>
             <Button asChild size="sm">
-              <a href={auth.signup.url}>{auth.signup.text}</a>
+              <Link href={auth.signup.url}>{auth.signup.text}</Link>
             </Button>
           </div>
         </nav>
@@ -106,21 +106,25 @@ const Navbar1 = ({
                   </Accordion>
                   <div className="border-t py-4">
                     <div className="grid grid-cols-2 justify-start">
-                      <a href="/prompt-library" className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground">
-                        Library
-                      </a>
-                      <a href="/studio" className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground">
-                        Studio
-                      </a>
+                      <Link href="/prompt-library" legacyBehavior passHref>
+                        <NavigationMenuLink className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground">
+                          Prompt Library
+                        </NavigationMenuLink>
+                      </Link>
+                      <Link href="/studio" legacyBehavior passHref>
+                        <NavigationMenuLink className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground">
+                          Studio
+                        </NavigationMenuLink>
+                      </Link>
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
                     <ThemeToggle />
                     <Button asChild variant="outline">
-                      <a href={auth.login.url}>{auth.login.text}</a>
+                      <Link href={auth.login.url}>{auth.login.text}</Link>
                     </Button>
                     <Button asChild>
-                      <a href={auth.signup.url}>{auth.signup.text}</a>
+                      <Link href={auth.signup.url}>{auth.signup.text}</Link>
                     </Button>
                   </div>
                 </div>

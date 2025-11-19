@@ -1,5 +1,7 @@
 import { PromptCard } from './PromptCard'
 import { fetchTemplates } from '../actions/prompt-actions'
+import nextLink from 'next/link'
+import { Link } from 'lucide-react'
 
 export const PromptsList = async () => {
   const templates = await fetchTemplates()
